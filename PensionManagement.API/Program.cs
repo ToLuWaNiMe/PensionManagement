@@ -17,10 +17,13 @@ builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation(); // Enables FluentValidation
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<MemberService>();
-builder.Services.AddScoped<ContributionService>();
+
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IContributionRepository, ContributionRepository>();
+builder.Services.AddScoped<IBenefitRepository, BenefitRepository>();
+
 
 // Register Validators
 builder.Services.AddScoped<IValidator<MemberDto>, MemberValidator>();
@@ -41,6 +44,8 @@ builder.Services.AddHangfire(config => config
 builder.Services.AddHangfireServer(); // Add Hangfire background job server
 
 // Register the Background Service
+builder.Services.AddScoped<MemberService>();
+builder.Services.AddScoped<ContributionService>();
 builder.Services.AddScoped<BackgroundJobService>();
 builder.Services.AddScoped<BenefitProcessingService>();
 
