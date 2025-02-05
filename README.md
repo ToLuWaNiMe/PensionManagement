@@ -28,7 +28,7 @@ Docker (Optional - for running SQL Server in a container)
 
 2️⃣ Clone the Repository
 
-git clone https://github.com/your-username/pension-contribution-management.git
+git clone https://github.com/ToLuWaNiMe/PensionManagement
 cd pension-contribution-management
 
 
