@@ -20,9 +20,6 @@ Visual Studio
 
 Swagger (For API testing)
 
-Docker (Optional - for running SQL Server in a container)
-
-
 
 ---
 
