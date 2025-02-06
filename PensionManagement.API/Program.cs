@@ -4,6 +4,7 @@ using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using PensionManagement.Application.Contracts;
 using PensionManagement.Application.DTOs;
+using PensionManagement.Application.Mappings;
 using PensionManagement.Application.Services;
 using PensionManagement.Application.Validations;
 using PensionManagement.Infrastructure.Middleware;
@@ -18,7 +19,7 @@ builder.Services.AddFluentValidationAutoValidation(); // Enables FluentValidatio
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IContributionRepository, ContributionRepository>();
