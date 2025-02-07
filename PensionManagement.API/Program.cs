@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using PensionManagement.API;
 using PensionManagement.Application.Contracts;
 using PensionManagement.Application.DTOs;
 using PensionManagement.Application.Mappings;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IBenefitRepository, BenefitRepository>();
 // Register Validators
 builder.Services.AddScoped<IValidator<MemberDto>, MemberValidator>();
 builder.Services.AddScoped<IValidator<ContributionDto>, ContributionValidator>();
+builder.Services.AddScoped<IValidator<BenefitDto>, BenefitValidator>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -47,6 +49,7 @@ builder.Services.AddHangfireServer(); // Add Hangfire background job server
 // Register the Background Service
 builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<ContributionService>();
+builder.Services.AddScoped<BenefitService>();
 builder.Services.AddScoped<BackgroundJobService>();
 builder.Services.AddScoped<BenefitProcessingService>();
 
@@ -61,10 +64,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionMiddleware>(); // Register global error handling
 app.UseHttpsRedirection();
+// Start Hangfire Dashboard
+app.UseHangfireDashboard();
+
 app.MapControllers();
 
-// Start Hangfire Dashboard
-app.UseHangfireDashboard("/hangfire");
 
 using (var scope = app.Services.CreateScope())
 {
