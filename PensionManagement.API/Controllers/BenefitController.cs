@@ -20,7 +20,7 @@ namespace PensionManagement.API.Controllers
         }
 
         [HttpGet("member/{memberId}")]
-        public async Task<ActionResult<IEnumerable<BenefitDto>>> GetByMemberId(Guid memberId)
+        public async Task<ActionResult<IEnumerable<BenefitDto>>> GetByMemberId(int memberId)
         {
             return Ok(await _benefitService.GetAllByMemberIdAsync(memberId));
         }

@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace PensionManagement.Domain.Enums
 {
-    public enum MemberType
+    public enum EligibilityStatus
     {
-        Employee,
-        SelfEmployed,
+        Eligible,
+        NotEligible,
+        Pending
     }
 }

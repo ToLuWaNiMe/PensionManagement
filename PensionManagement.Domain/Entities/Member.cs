@@ -6,15 +6,17 @@ namespace PensionManagement.Domain.Entities
 {
     public class Member
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
-        public string PhoneNumber { get; set; }
-        public MemberType MemberType { get; set; } // Enum for Employee/Self-employed
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public MemberType MemberType { get; set; }
         public bool IsDeleted { get; set; } = false;
+
+        public virtual ICollection<Contribution> Contributions { get; set; } = new List<Contribution>();
+        public virtual ICollection<Benefit> Benefits { get; set; } = new List<Benefit>();
     }
+
 }

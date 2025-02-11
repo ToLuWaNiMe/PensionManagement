@@ -4,14 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PensionManagement.Domain.Entities
+namespace PensionManagement.Application.DTOs
 {
-    public class Employer
+    public class EmployerDto
     {
-        public int Id { get; set; }
         public string CompanyName { get; set; } = string.Empty;
         public string RegistrationNumber { get; set; } = string.Empty;
-        public bool ActiveStatus { get; set; }
     }
-
 }

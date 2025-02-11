@@ -31,6 +31,7 @@ builder.Services.AddScoped<IBenefitRepository, BenefitRepository>();
 builder.Services.AddScoped<IValidator<MemberDto>, MemberValidator>();
 builder.Services.AddScoped<IValidator<ContributionDto>, ContributionValidator>();
 builder.Services.AddScoped<IValidator<BenefitDto>, BenefitValidator>();
+builder.Services.AddScoped<IValidator<TransactionHistoryDto>, TransactionHistoryValidator>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -52,6 +53,7 @@ builder.Services.AddScoped<ContributionService>();
 builder.Services.AddScoped<BenefitService>();
 builder.Services.AddScoped<BackgroundJobService>();
 builder.Services.AddScoped<BenefitProcessingService>();
+builder.Services.AddScoped<ITransactionHistoryService, TransactionHistoryService>();
 
 var app = builder.Build();
 

@@ -14,7 +14,7 @@ namespace PensionManagement.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Member> GetByIdAsync(Guid id)
+        public async Task<Member> GetByIdAsync(int id)
         {
             return await _context.Members.FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
         }
@@ -36,7 +36,7 @@ namespace PensionManagement.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(int id)
         {
             var member = await GetByIdAsync(id);
             if (member != null)

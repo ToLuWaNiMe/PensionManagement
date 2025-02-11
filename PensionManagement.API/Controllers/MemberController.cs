@@ -22,7 +22,7 @@ namespace PensionManagement.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<MemberDto>> GetById(Guid id)
+        public async Task<ActionResult<MemberDto>> GetById(int id)
         {
             var member = await _memberService.GetByIdAsync(id);
             return member == null ? NotFound() : Ok(member);
@@ -36,14 +36,14 @@ namespace PensionManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] MemberDto memberDto)
+        public async Task<IActionResult> Update(int id, [FromBody] MemberDto memberDto)
         {
             await _memberService.UpdateAsync(id, memberDto);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(int id)
         {
             await _memberService.DeleteAsync(id);
             return NoContent();

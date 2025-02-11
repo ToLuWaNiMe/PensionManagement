@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace PensionManagement.Domain.Enums
 {
-    public enum MemberType
+    public enum EntityType
     {
-        Employee,
-        SelfEmployed,
+        Member,
+        Contribution,
+        Employer,
+        Benefit
     }
 }

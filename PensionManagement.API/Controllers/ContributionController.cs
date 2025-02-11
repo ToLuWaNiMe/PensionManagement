@@ -16,7 +16,7 @@ namespace PensionManagement.API.Controllers
         }
 
         [HttpGet("member/{memberId}")]
-        public async Task<ActionResult<IEnumerable<ContributionDto>>> GetByMemberId(Guid memberId)
+        public async Task<ActionResult<IEnumerable<ContributionDto>>> GetByMemberId(int memberId)
         {
             return Ok(await _contributionService.GetAllByMemberIdAsync(memberId));
         }
@@ -29,14 +29,14 @@ namespace PensionManagement.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ContributionDto contributionDto)
+        public async Task<IActionResult> Update(int id, [FromBody] ContributionDto contributionDto)
         {
             await _contributionService.UpdateAsync(id, contributionDto);
             return NoContent();
         }
 
         [HttpGet("member/{memberId}/total")]
-        public async Task<ActionResult<decimal>> GetTotalContributions(Guid memberId)
+        public async Task<ActionResult<decimal>> GetTotalContributions(int memberId)
         {
             var contributions = await _contributionService.GetAllByMemberIdAsync(memberId);
             var total = contributions.Sum(c => c.Amount);

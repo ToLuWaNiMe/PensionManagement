@@ -8,13 +8,18 @@ namespace PensionManagement.Application.Validations
     {
         public BenefitValidator()
         {
-            RuleFor(b => b.MemberId).NotEmpty();
+            RuleFor(b => b.MemberId)
+                .GreaterThan(0).WithMessage("Member ID is required.");
+
             RuleFor(b => b.BenefitType)
-                .IsInEnum()
-                .WithMessage("Invalid benefit type.");
+                .NotEmpty().WithMessage("Benefit type is required.");
+
+            RuleFor(b => b.CalculationDate)
+                .NotEmpty().WithMessage("Calculation date is required.")
+                .LessThanOrEqualTo(DateTime.Today).WithMessage("Calculation date cannot be in the future.");
+
             RuleFor(b => b.Amount)
-                .GreaterThan(0)
-                .WithMessage("Benefit amount must be greater than zero.");
+                .GreaterThanOrEqualTo(0).WithMessage("Amount must be zero or greater.");
         }
     }
 }

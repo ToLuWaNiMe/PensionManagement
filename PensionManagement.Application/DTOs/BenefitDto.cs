@@ -4,8 +4,9 @@ namespace PensionManagement.Application.DTOs
 {
     public class BenefitDto
     {
-        public Guid MemberId { get; set; }
+        public int MemberId { get; set; }
         public BenefitType BenefitType { get; set; }
+        public DateTime CalculationDate { get; set; }
         public decimal Amount { get; set; }
     }
 }

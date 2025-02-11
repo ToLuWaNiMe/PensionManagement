@@ -15,6 +15,8 @@ namespace PensionManagement.Application.Mappings
 
             // Mapping for Benefit
             CreateMap<Benefit, BenefitDto>().ReverseMap();
+
+            CreateMap<TransactionHistory, TransactionHistoryDto>().ReverseMap();
         }
     }
 }

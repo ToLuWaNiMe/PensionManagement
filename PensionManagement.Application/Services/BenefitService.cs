@@ -17,7 +17,7 @@ namespace PensionManagement.Application.Services
             _benefitRepository = benefitRepository;
         }
 
-        public async Task<bool> IsEligibleForBenefit(Guid memberId, BenefitType benefitType)
+        public async Task<bool> IsEligibleForBenefit(int memberId, BenefitType benefitType)
         {
             var member = await _memberRepository.GetByIdAsync(memberId);
             if (member == null) return false;
@@ -44,7 +44,7 @@ namespace PensionManagement.Application.Services
             return false;
         }
         
-        public async Task<decimal> CalculateBenefitAmount(Guid memberId, BenefitType benefitType)
+        public async Task<decimal> CalculateBenefitAmount(int memberId, BenefitType benefitType)
         {
             var totalContributions = (await _contributionRepository.GetAllByMemberIdAsync(memberId))
                 .Sum(c => c.Amount);
@@ -61,7 +61,7 @@ namespace PensionManagement.Application.Services
             return 0;
         }
 
-        public async Task<IEnumerable<BenefitDto>> GetAllByMemberIdAsync(Guid memberId)
+        public async Task<IEnumerable<BenefitDto>> GetAllByMemberIdAsync(int memberId)
         {
             var benefits = await _benefitRepository.GetAllByMemberIdAsync(memberId);
 

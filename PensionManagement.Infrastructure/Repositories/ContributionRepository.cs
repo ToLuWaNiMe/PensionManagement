@@ -14,14 +14,14 @@ namespace PensionManagement.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Contribution> GetByIdAsync(Guid id)
+        public async Task<Contribution> GetByIdAsync(int id)
         {
             return await _context.Contributions
                 .Include(c => c.Member)
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<IEnumerable<Contribution>> GetAllByMemberIdAsync(Guid memberId)
+        public async Task<IEnumerable<Contribution>> GetAllByMemberIdAsync(int memberId)
         {
             return await _context.Contributions
                 .Where(c => c.MemberId == memberId)
@@ -31,7 +31,7 @@ namespace PensionManagement.Infrastructure.Repositories
         public async Task<IEnumerable<Contribution>> GetAllPendingContributionsAsync()
         {
             return await _context.Contributions
-                .Where(c => !c.IsValid.HasValue) // Fetch only unvalidated contributions
+                .Where(c => c.Amount != null)
                 .ToListAsync();
         }
 

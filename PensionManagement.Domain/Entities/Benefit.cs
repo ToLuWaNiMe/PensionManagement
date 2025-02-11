@@ -5,12 +5,13 @@ namespace PensionManagement.Domain.Entities
 {
     public class Benefit
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid MemberId { get; set; } // Foreign Key
+        public int Id { get; set; }
+        public int MemberId { get; set; }
         public BenefitType BenefitType { get; set; }
+        public DateTime CalculationDate { get; set; }
+        public EligibilityStatus EligibilityStatus { get; set; }
         public decimal Amount { get; set; }
-        public DateTime CalculationDate { get; set; } = DateTime.UtcNow;
-        public bool EligibilitySatus { get; set; } = false;
-        public Member Member { get; set; } // Navigation property
+
+        public virtual Member Member { get; set; } = null!;
     }
 }

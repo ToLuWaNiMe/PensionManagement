@@ -11,11 +11,27 @@ namespace PensionManagement.Infrastructure.Persistence
         public DbSet<Contribution> Contributions { get; set; }
         public DbSet<Employer> Employers { get; set; }
         public DbSet<Benefit> Benefits { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<TransactionHistory> TransactionHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Member>()
+            .HasIndex(m => m.Email)
+            .IsUnique();
+
+            modelBuilder.Entity<Contribution>()
+                .HasOne(c => c.Member)
+                .WithMany(m => m.Contributions)
+                .HasForeignKey(c => c.MemberId);
+
+            modelBuilder.Entity<Benefit>()
+                .HasOne(b => b.Member)
+                .WithMany(m => m.Benefits)
+                .HasForeignKey(b => b.MemberId);
+
+            modelBuilder.Entity<TransactionHistory>()
+                .Property(t => t.ChangeDate)
+                .HasDefaultValueSql("GETUTCDATE()");
         }
     }
 }

@@ -16,7 +16,7 @@ namespace PensionManagement.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ContributionDto>> GetAllByMemberIdAsync(Guid memberId)
+        public async Task<IEnumerable<ContributionDto>> GetAllByMemberIdAsync(int memberId)
         {
             var contributions = await _repository.GetAllByMemberIdAsync(memberId);
             return _mapper.Map<IEnumerable<ContributionDto>>(contributions);
@@ -28,7 +28,7 @@ namespace PensionManagement.Application.Services
             await _repository.AddAsync(contribution);
         }
 
-        public async Task UpdateAsync(Guid id, ContributionDto contributionDto)
+        public async Task UpdateAsync(int id, ContributionDto contributionDto)
         {
             var existingContribution = await _repository.GetByIdAsync(id);
             if (existingContribution != null)
