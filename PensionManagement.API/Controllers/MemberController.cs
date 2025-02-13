@@ -4,8 +4,8 @@ using PensionManagement.Application.Services;
 
 namespace PensionManagement.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class MemberController : ControllerBase
     {
         private readonly MemberService _memberService;
@@ -15,7 +15,7 @@ namespace PensionManagement.API.Controllers
             _memberService = memberService;
         }
 
-        [HttpGet]
+        [HttpGet("members/{Total}")]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetAll()
         {
             return Ok(await _memberService.GetAllAsync());

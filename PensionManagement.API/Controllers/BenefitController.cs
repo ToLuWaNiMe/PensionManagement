@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace PensionManagement.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class BenefitController : ControllerBase
     {
         private readonly BenefitService _benefitService;

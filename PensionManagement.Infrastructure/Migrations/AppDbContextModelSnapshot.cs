@@ -24,9 +24,11 @@ namespace PensionManagement.Infrastructure.Migrations
 
             modelBuilder.Entity("PensionManagement.Domain.Entities.Benefit", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -37,11 +39,11 @@ namespace PensionManagement.Infrastructure.Migrations
                     b.Property<DateTime>("CalculationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("EligibilitySatus")
-                        .HasColumnType("bit");
+                    b.Property<int>("EligibilityStatus")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("MemberId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -52,9 +54,11 @@ namespace PensionManagement.Infrastructure.Migrations
 
             modelBuilder.Entity("PensionManagement.Domain.Entities.Contribution", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -65,14 +69,15 @@ namespace PensionManagement.Infrastructure.Migrations
                     b.Property<int>("ContributionType")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsProcessed")
+                    b.Property<bool>("IsValid")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsValid")
-                        .HasColumnType("bit");
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("MemberId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ReferenceNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -83,19 +88,18 @@ namespace PensionManagement.Infrastructure.Migrations
 
             modelBuilder.Entity("PensionManagement.Domain.Entities.Employer", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("ActiveStatus")
+                        .HasColumnType("bit");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<string>("RegistrationNumber")
                         .IsRequired()
@@ -108,19 +112,18 @@ namespace PensionManagement.Infrastructure.Migrations
 
             modelBuilder.Entity("PensionManagement.Domain.Entities.Member", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -140,42 +143,49 @@ namespace PensionManagement.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Members");
                 });
 
-            modelBuilder.Entity("PensionManagement.Domain.Entities.Transaction", b =>
+            modelBuilder.Entity("PensionManagement.Domain.Entities.TransactionHistory", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Description")
+                    b.Property<DateTime>("ChangeDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("ChangedData")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("MemberId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EntityType")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("TransactionHistories");
                 });
 
             modelBuilder.Entity("PensionManagement.Domain.Entities.Benefit", b =>
                 {
                     b.HasOne("PensionManagement.Domain.Entities.Member", "Member")
-                        .WithMany()
+                        .WithMany("Benefits")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -186,12 +196,19 @@ namespace PensionManagement.Infrastructure.Migrations
             modelBuilder.Entity("PensionManagement.Domain.Entities.Contribution", b =>
                 {
                     b.HasOne("PensionManagement.Domain.Entities.Member", "Member")
-                        .WithMany()
+                        .WithMany("Contributions")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("PensionManagement.Domain.Entities.Member", b =>
+                {
+                    b.Navigation("Benefits");
+
+                    b.Navigation("Contributions");
                 });
 #pragma warning restore 612, 618
         }

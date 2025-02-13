@@ -15,6 +15,7 @@ namespace PensionManagement.API.Controllers
             _transactionHistoryService = transactionHistoryService;
         }
 
+        [HttpGet("TransactionHistories")]
         public ActionResult<IEnumerable<TransactionHistoryDto>> GetTransactionHistory()
         {
             var transactionHistory = _transactionHistoryService.GetTransactionHistory;

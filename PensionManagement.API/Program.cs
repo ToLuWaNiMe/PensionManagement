@@ -70,6 +70,8 @@ app.UseHttpsRedirection();
 app.UseHangfireDashboard();
 
 app.MapControllers();
+app.UseRouting();
+app.UseAuthorization();
 
 
 using (var scope = app.Services.CreateScope())
