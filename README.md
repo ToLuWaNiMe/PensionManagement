@@ -7,7 +7,6 @@ The Pension Contribution Management System is a .NET Core 7+ application designe
 
 ---
 
-
 1️⃣ Prerequisites
 
 Ensure you have the following installed on your system:
@@ -56,7 +55,6 @@ Create an appsettings.json file in the src/API folder with the following:
 Run the following command to apply migrations:
 
 dotnet ef database update --project src/Infrastructure
-
 
 ---
 
