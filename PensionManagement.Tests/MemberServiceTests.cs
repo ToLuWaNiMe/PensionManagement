@@ -4,124 +4,192 @@ using PensionManagement.Application.Contracts;
 using PensionManagement.Application.DTOs;
 using PensionManagement.Application.Services;
 using PensionManagement.Domain.Entities;
+using PensionManagement.Domain.Enums;
+using FluentAssertions;
 
 namespace PensionManagement.Tests;
 
 public class MemberServiceTests
 {
-    //private readonly Mock<IMemberRepository> _repositoryMock;
-    //private readonly Mock<IMapper> _mapperMock;
-    //private readonly MemberService _memberService;
+    private readonly Mock<IMemberRepository> _memberRepositoryMock;
+    private readonly Mock<ITransactionHistoryService> _transactionHistoryServiceMock;
+    private readonly IMapper _mapper;
+    private readonly MemberService _memberService;
 
-    //public MemberServiceTests()
-    //{
-    //    _repositoryMock = new Mock<IMemberRepository>();
-    //    _mapperMock = new Mock<IMapper>();
-    //    _memberService = new MemberService(_repositoryMock.Object, _mapperMock.Object);
-    //}
+    public MemberServiceTests()
+    {
+        _memberRepositoryMock = new Mock<IMemberRepository>();
+        _transactionHistoryServiceMock = new Mock<ITransactionHistoryService>();
 
-    //[Fact]
-    //public async Task GetAllAsync_ShouldReturnMappedMemberDtos()
-    //{
-    //    // Arrange
-    //    var members = new List<Member>
-    //    {
-    //        new Member { Id = members[0].Id, FirstName = "John", LastName = "Doe", Email = "john@example.com" },
-    //        new Member { Id = Guid.NewGuid(), FirstName = "Jane", LastName = "Smith", Email = "jane@example.com" }
-    //    };
-    //    var memberDtos = new List<MemberDto>
-    //    {
-    //        new MemberDto { Id = members[0].Id, FirstName = "John", LastName = "Doe", Email = "john@example.com" },
-    //        new MemberDto { Id = members[1].Id, FirstName = "Jane", LastName = "Smith", Email = "jane@example.com" }
-    //    };
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<Member, MemberDto>().ReverseMap();
+        });
 
-    //    _repositoryMock.Setup(repo => repo.GetAllAsync()).ReturnsAsync(members);
-    //    _mapperMock.Setup(mapper => mapper.Map<IEnumerable<MemberDto>>(members)).Returns(memberDtos);
+        _mapper = config.CreateMapper();
 
-    //    // Act
-    //    var result = await _memberService.GetAllAsync();
+        _memberService = new MemberService(
+            _memberRepositoryMock.Object,
+            _mapper,
+            _transactionHistoryServiceMock.Object
+        );
+    }
 
-    //    // Assert
-    //    Assert.NotNull(result);
-    //    Assert.Equal(2, memberDtos.Count);
-    //    _repositoryMock.Verify(repo => repo.GetAllAsync(), Times.Once);
-    //    _mapperMock.Verify(mapper => mapper.Map<IEnumerable<MemberDto>>(members), Times.Once);
-    //}
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnListOfMembers()
+    {
+        // Arrange
+        var members = new List<Member>
+        {
+            new Member { Id = 1, FirstName = "John", LastName = "Doe" },
+            new Member { Id = 2, FirstName = "Jane", LastName = "Smith" }
+        };
 
-    //[Fact]
-    //public async Task GetByIdAsync_ShouldReturnMappedMemberDto_WhenMemberExists()
-    //{
-    //    // Arrange
-    //    var memberId = new Member;
-    //    var member = new Member { Id = 1, FirstName = "John", LastName = "Doe", Email = "john@example.com" };
-    //    var memberDto = new MemberDto { Id = 1, FirstName = "John", LastName = "Doe", Email = "john@example.com" };
+        _memberRepositoryMock.Setup(repo => repo.GetAllAsync()).ReturnsAsync(members);
 
-    //    _repositoryMock.Setup(repo => repo.GetByIdAsync(memberId)).ReturnsAsync(member);
-    //    _mapperMock.Setup(mapper => mapper.Map<MemberDto>(member)).Returns(memberDto);
+        // Act
+        var result = await _memberService.GetAllAsync();
 
-    //    // Act
-    //    var result = await _memberService.GetByIdAsync(memberId);
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(2);
+        _memberRepositoryMock.Verify(repo => repo.GetAllAsync(), Times.Once);
+    }
 
-    //    // Assert
-    //    Assert.NotNull(result);
-    //    Assert.Equal(memberDto.Id, result.Id);
-    //    Assert.Equal(memberDto.FirstName, result.FirstName);
-    //    Assert.Equal(memberDto.Email, result.Email);
-    //    _repositoryMock.Verify(repo => repo.GetByIdAsync(memberId), Times.Once);
-    //    _mapperMock.Verify(mapper => mapper.Map<MemberDto>(member), Times.Once);
-    //}
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnMember_WhenMemberExists()
+    {
+        // Arrange
+        var member = new Member { Id = 1, FirstName = "John", LastName = "Doe" };
 
-    //[Fact]
-    //public async Task AddAsync_ShouldCallRepositoryAddAsync()
-    //{
-    //    // Arrange
-    //    var memberDto = new MemberDto { FirstName = "John", LastName = "Doe", Email = "john@example.com" };
-    //    var member = new Member { Id = memberDto.Id, FirstName = "John", LastName = "Doe", Email = "john@example.com" };
+        _memberRepositoryMock.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(member);
 
-    //    _mapperMock.Setup(mapper => mapper.Map<Member>(memberDto)).Returns(member);
-    //    _repositoryMock.Setup(repo => repo.AddAsync(member)).Returns(Task.CompletedTask);
+        // Act
+        var result = await _memberService.GetByIdAsync(1);
 
-    //    // Act
-    //    await _memberService.AddAsync(memberDto);
+        // Assert
+        result.Should().NotBeNull();
+        result.FirstName.Should().Be("John");
+        _memberRepositoryMock.Verify(repo => repo.GetByIdAsync(1), Times.Once);
+    }
 
-    //    // Assert
-    //    _repositoryMock.Verify(repo => repo.AddAsync(member), Times.Once);
-    //    _mapperMock.Verify(mapper => mapper.Map<Member>(memberDto), Times.Once);
-    //}
+    [Fact]
+    public async Task AddAsync_ShouldAddMemberAndLogTransaction()
+    {
+        // Arrange
+        var memberDto = new MemberDto { Id = 1, FirstName = "John", LastName = "Doe" };
+        var member = _mapper.Map<Member>(memberDto);
 
-    //[Fact]
-    //public async Task UpdateAsync_ShouldUpdateExistingMember_WhenMemberExists()
-    //{
-    //    // Arrange
-    //    var memberId = Guid.NewGuid();
-    //    var existingMember = new Member { Id = memberId, FirstName = "Old Name", Email = "old@example.com" };
-    //    var updatedMemberDto = new MemberDto { Id = memberId, FirstName = "New Name", Email = "new@example.com" };
+        _memberRepositoryMock.Setup(repo => repo.AddAsync(It.IsAny<Member>())).Returns(Task.CompletedTask);
+        _transactionHistoryServiceMock.Setup(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()));
 
-    //    _repositoryMock.Setup(repo => repo.GetByIdAsync(memberId)).ReturnsAsync(existingMember);
-    //    _repositoryMock.Setup(repo => repo.UpdateAsync(existingMember)).Returns(Task.CompletedTask);
-    //    _mapperMock.Setup(mapper => mapper.Map(updatedMemberDto, existingMember));
+        // Act
+        await _memberService.AddAsync(memberDto);
 
-    //    // Act
-    //    await _memberService.UpdateAsync(memberId, updatedMemberDto);
+        // Assert
+        _memberRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Member>()), Times.Once);
+        _transactionHistoryServiceMock.Verify(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()), Times.Once);
+    }
 
-    //    // Assert
-    //    Assert.Equal("New Name", existingMember.FirstName);
-    //    Assert.Equal("new@example.com", existingMember.Email);
-    //    _repositoryMock.Verify(repo => repo.UpdateAsync(existingMember), Times.Once);
-    //    _mapperMock.Verify(mapper => mapper.Map(updatedMemberDto, existingMember), Times.Once);
-    //}
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowException_WhenMemberDoesNotExist()
+    {
+        // Arrange
+        _memberRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((Member)null);
 
-    //[Fact]
-    //public async Task DeleteAsync_ShouldCallRepositoryDeleteAsync()
-    //{
-    //    // Arrange
-    //    var memberId = Guid.NewGuid;
-    //    _repositoryMock.Setup(repo => repo.DeleteAsync(memberId)).Returns(Task.CompletedTask);
+        // Act
+        Func<Task> act = async () => await _memberService.UpdateAsync(1, new MemberDto());
 
-    //    // Act
-    //    await _memberService.DeleteAsync(memberId);
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
+    }
 
-    //    // Assert
-    //    _repositoryMock.Verify(repo => repo.DeleteAsync(memberId), Times.Once);
-    //}
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateMemberAndLogTransaction()
+    {
+        // Arrange
+        var existingMember = new Member { Id = 1, FirstName = "John", LastName = "Doe" };
+        var updatedMemberDto = new MemberDto { Id = 1, FirstName = "Johnathan", LastName = "Doe" };
+
+        _memberRepositoryMock.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingMember);
+        _memberRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Member>())).Returns(Task.CompletedTask);
+        _transactionHistoryServiceMock.Setup(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()));
+
+        // Act
+        await _memberService.UpdateAsync(1, updatedMemberDto);
+
+        // Assert
+        existingMember.FirstName.Should().Be("Johnathan");
+        _memberRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Member>()), Times.Once);
+        _transactionHistoryServiceMock.Verify(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldDeleteMemberAndLogTransaction()
+    {
+        // Arrange
+        _memberRepositoryMock.Setup(repo => repo.DeleteAsync(1)).Returns(Task.CompletedTask);
+        _transactionHistoryServiceMock.Setup(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()));
+
+        // Act
+        await _memberService.DeleteAsync(1);
+
+        // Assert
+        _memberRepositoryMock.Verify(repo => repo.DeleteAsync(1), Times.Once);
+        _transactionHistoryServiceMock.Verify(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task PartialUpdate_ShouldUpdateOnlyProvidedFields()
+    {
+        // Arrange
+        var existingMember = new Member { Id = 1, FirstName = "John", LastName = "Doe", Email = "john@example.com" };
+        var updateDto = new MemberDto { Id = 1, FirstName = "Johnny" }; // Only updating FirstName
+
+        _memberRepositoryMock.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingMember);
+        _memberRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Member>())).Returns(Task.CompletedTask);
+
+        // Act
+        await _memberService.UpdateAsync(1, updateDto);
+
+        // Assert
+        existingMember.FirstName.Should().Be("Johnny");
+        existingMember.Email.Should().Be("john@example.com"); // Ensuring Email remains unchanged
+    }
+
+    [Fact]
+    public async Task SoftDelete_ShouldMarkMemberAsDeleted()
+    {
+        // Arrange
+        var existingMember = new Member { Id = 1, IsDeleted = false };
+        _memberRepositoryMock.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(existingMember);
+        _memberRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Member>())).Returns(Task.CompletedTask);
+
+        // Act
+        await _memberService.DeleteAsync(1);
+
+        // Assert
+        existingMember.IsDeleted.Should().BeTrue();
+        _memberRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Member>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task TransactionLog_ShouldContainCorrectDetails()
+    {
+        // Arrange
+        var memberDto = new MemberDto { Id = 1, FirstName = "John", LastName = "Doe" };
+
+        _memberRepositoryMock.Setup(repo => repo.AddAsync(It.IsAny<Member>())).Returns(Task.CompletedTask);
+        _transactionHistoryServiceMock.Setup(svc => svc.LogChange(It.IsAny<TransactionHistoryDto>()));
+
+        // Act
+        await _memberService.AddAsync(memberDto);
+
+        // Assert
+        _transactionHistoryServiceMock.Verify(svc => svc.LogChange(It.Is<TransactionHistoryDto>(
+            t => t.EntityType == EntityType.Member &&
+                 t.EntityId == memberDto.Id &&
+                 t.ActionType == ActionType.INSERT
+        )), Times.Once);
+    }
 }
